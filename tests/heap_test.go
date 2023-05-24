@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	alg "github.com/hung0913208/go-algorithm/lib/algorithm"
+	"github.com/hung0913208/go-algorithm/lib/algorithm/heap"
 )
 
 var table = []struct {
@@ -17,7 +17,7 @@ var table = []struct {
 }
 
 func BenchmarkHeap(b *testing.B) {
-	heap := alg.NewIntHeap(true)
+	heap := heap.NewIntHeap(true)
 
 	for _, v := range table {
 		b.Run(

@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	algo "github.com/hung0913208/go-algorithm/lib/algorithm"
+	"github.com/hung0913208/go-rbtreerithm/lib/rbtreerithm/rbtree"
 )
 
 func TestInsertRbTree(t *testing.T) {
-	tree := algo.NewIntRbTree(true)
+	tree := rbtree.NewIntRbTree(true)
 
 	for _, val := range []int{10, 5, 15, 3, 7, 20} {
 		err := tree.Put(val, val)
@@ -30,7 +30,7 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root faces error: %v", err)
 	}
-	if rootColor != algo.Black {
+	if rootColor != rbtree.Black {
 		t.Errorf("color root is not black, is actually %v", rootColor)
 	}
 
@@ -45,7 +45,7 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's left faces error: %v", err)
 	}
-	if leftColor != algo.Black {
+	if leftColor != rbtree.Black {
 		t.Errorf("color root's left is not black, is actually %v", leftColor)
 	}
 
@@ -60,7 +60,7 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's right faces error: %v", err)
 	}
-	if rightColor != algo.Black {
+	if rightColor != rbtree.Black {
 		t.Errorf("color root's right is not black, is actually %v", rightColor)
 	}
 
@@ -75,7 +75,7 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's left left child faces error: %v", err)
 	}
-	if leftleftColor != algo.Red {
+	if leftleftColor != rbtree.Red {
 		t.Errorf("color root's left left child is not red, is actually %v", leftleftColor)
 	}
 
@@ -90,7 +90,7 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's right right child faces error: %v", err)
 	}
-	if leftrightColor != algo.Red {
+	if leftrightColor != rbtree.Red {
 		t.Errorf("color root's left right child is not red, is actually %v", leftrightColor)
 	}
 
@@ -105,13 +105,13 @@ func TestInsertRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's right right child faces error: %v", err)
 	}
-	if rightrightColor != algo.Red {
+	if rightrightColor != rbtree.Red {
 		t.Errorf("color root's right right child is not red, is actually %v", rightrightColor)
 	}
 }
 
 func TestInsertComplicatedToRbTree(t *testing.T) {
-	tree := algo.NewIntRbTree(true)
+	tree := rbtree.NewIntRbTree(true)
 	//samples := []int{50, 30, 70, 40, 10, 60, 80, 20}
 	samples := []int{11, 2, 31, 34, 7, 35, 47, 0, 49, 26, 46, 3, 24, 13, 4, 37, 27, 12, 16, 10, 39, 19, 29, 25, 33, 41, 28, 45, 30, 48}
 
@@ -142,13 +142,13 @@ func TestInsertComplicatedToRbTree(t *testing.T) {
 			return err
 		}
 
-		if color == algo.Red {
+		if color == rbtree.Red {
 			color, err = tree.Color(left)
 			if err != nil {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, left)
 			}
 
@@ -157,7 +157,7 @@ func TestInsertComplicatedToRbTree(t *testing.T) {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, right)
 			}
 		}
@@ -170,7 +170,7 @@ func TestInsertComplicatedToRbTree(t *testing.T) {
 }
 
 func TestDeleteRbTree(t *testing.T) {
-	tree := algo.NewIntRbTree(true)
+	tree := rbtree.NewIntRbTree(true)
 	keys := []int{10, 5, 15, 3, 7, 12, 17, 1, 4, 6, 8, 11, 13, 16, 18, 2, 9}
 	dels := []int{5, 15, 17, 10}
 
@@ -203,7 +203,7 @@ func TestDeleteRbTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("color root's right faces error: %v", err)
 	}
-	if color != algo.Black {
+	if color != rbtree.Black {
 		t.Errorf("color root is not black")
 	}
 	err = tree.Iterate(func(key interface{}) error {
@@ -216,13 +216,13 @@ func TestDeleteRbTree(t *testing.T) {
 			return err
 		}
 
-		if color == algo.Red {
+		if color == rbtree.Red {
 			color, err = tree.Color(left)
 			if err != nil {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, left)
 			}
 
@@ -231,7 +231,7 @@ func TestDeleteRbTree(t *testing.T) {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, right)
 			}
 		}
@@ -250,7 +250,7 @@ func TestInsertRbTreeRandom(t *testing.T) {
 	keys := make([]int, size+7)
 
 	// Initialize a Red-Black Tree with some values
-	tree := algo.NewIntRbTreeWithCache(size, true)
+	tree := rbtree.NewIntRbTreeWithCache(size, true)
 	for i := 0; i < size; i++ {
 		keys[i] = rand.Intn(size)
 		err := tree.Put(keys[i], rand.Intn(size))
@@ -279,13 +279,13 @@ func TestInsertRbTreeRandom(t *testing.T) {
 			return err
 		}
 
-		if color == algo.Red {
+		if color == rbtree.Red {
 			color, err = tree.Color(left)
 			if err != nil {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, left)
 			}
 
@@ -294,7 +294,7 @@ func TestInsertRbTreeRandom(t *testing.T) {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, right)
 			}
 		}
@@ -314,7 +314,7 @@ func TestDeleteRbTreeRandom(t *testing.T) {
 	stats := make([]bool, size+7)
 
 	// Initialize a Red-Black Tree with some values
-	tree := algo.NewIntRbTreeWithCache(size, true)
+	tree := rbtree.NewIntRbTreeWithCache(size, true)
 	for i := 0; i < size; i++ {
 		keys[i] = rand.Intn(size)
 		err := tree.Put(keys[i], rand.Intn(size))
@@ -361,13 +361,13 @@ func TestDeleteRbTreeRandom(t *testing.T) {
 			return err
 		}
 
-		if color == algo.Red {
+		if color == rbtree.Red {
 			color, err = tree.Color(left)
 			if err != nil {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, left)
 			}
 
@@ -376,7 +376,7 @@ func TestDeleteRbTreeRandom(t *testing.T) {
 				t.Errorf("get color fails: %v", err)
 				return err
 			}
-			if color == algo.Red {
+			if color == rbtree.Red {
 				t.Errorf("red's child (%d -> %d) must not be red", key, right)
 				tree.Lookup(right, true)
 			}
@@ -413,7 +413,7 @@ func BenchmarkInsertRbTree(b *testing.B) {
 				size := v.input
 
 				// Initialize a Red-Black Tree with some values
-				tree := algo.NewIntRbTreeWithCache(size, true)
+				tree := rbtree.NewIntRbTreeWithCache(size, true)
 				for i := 0; i < size; i++ {
 					err := tree.Put(keys[i], keys[i])
 					if err != nil {
@@ -441,7 +441,7 @@ func BenchmarkDeleteRbTree(b *testing.B) {
 				size := v.input
 
 				// Initialize a Red-Black Tree with some values
-				tree := algo.NewIntRbTreeWithCache(size, true)
+				tree := rbtree.NewIntRbTreeWithCache(size, true)
 				for i := 0; i < size; i++ {
 					err := tree.Put(keys[i], keys[i])
 					if err != nil {

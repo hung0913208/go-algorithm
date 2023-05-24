@@ -1,8 +1,10 @@
-package algorithm
+package rbtree
 
 import (
 	"errors"
 	"log"
+
+	"github.com/hung0913208/go-algorithm/lib/algorithm/heap"
 )
 
 type RbTree interface {
@@ -28,11 +30,11 @@ type RbTree interface {
 }
 
 type rbTreeImpl struct {
-	compare Comparator
+	compare heap.Comparator
 	array   []rbNodeImpl
 	root    int
 	size    int
-	gc      Heap
+	gc      heap.Heap
 	debug   bool
 }
 
