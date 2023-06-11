@@ -95,7 +95,6 @@ func Init(
 	} else {
 		err = container.Init(nil)
 	}
-
 	if err != nil {
 		container.Terminate(
 			"Can't setup container to store modules",
