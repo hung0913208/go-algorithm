@@ -61,9 +61,9 @@ const (
 	RIGHT = 1
 )
 
-func NewRbTreeWithCacheSize(size int, compare Comparator) RbTree {
+func NewRbTreeWithCacheSize(size int, compare heap.Comparator) RbTree {
 	return &rbTreeImpl{
-		gc:      NewIntHeap(true),
+		gc:      heap.NewIntHeap(true),
 		root:    EMPTY,
 		size:    1,
 		array:   make([]rbNodeImpl, size+1),

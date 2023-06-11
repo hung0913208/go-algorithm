@@ -8,7 +8,6 @@ WORKDIR /app
 COPY . /app
 
 # Build the application
-RUN go mod tidy
 RUN go build -o main ./cmd/main.go
 
 FROM ubuntu:latest
