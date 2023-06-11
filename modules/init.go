@@ -16,21 +16,22 @@ import (
 	"github.com/hung0913208/go-algorithm/lib/db"
 	"github.com/hung0913208/go-algorithm/lib/kv"
 	"github.com/hung0913208/go-algorithm/lib/logs"
+	"github.com/hung0913208/go-algorithm/modules/spawn"
 )
 
 const (
 	NoError int = iota
 	ErrorInitContainer
 	ErrorInitSentry
-	ErrorInitUptime
-	ErrorInitBizfly
+	ErrorInitSql
 	ErrorInitRedis
 	ErrorInitMemcache
-	ErrorRegisterCrawl
-	ErrorRegisterBot
+	ErrorRegisterError
 	ErrorRegisterSql
 	ErrorRegisterRedis
 	ErrorRegisterMemcache
+	ErrorRegisterSpawn
+	ErrorRegisterBot
 )
 
 var (
@@ -137,7 +138,7 @@ func Init(
 	)
 
 	if err != nil {
-		container.Terminate("Can't register module `error`", ErrorRegisterSql)
+		container.Terminate("Can't register module `error`", ErrorRegisterError)
 	}
 
 	log.Print("Finish configuring error")
@@ -157,7 +158,7 @@ func Init(
 			os.Getenv("ELEPHANSQL_DATABASE"),
 		)
 		if err != nil {
-			container.Terminate("Can't register module `elephansql`", ErrorRegisterSql)
+			container.Terminate("Can't init module `elephansql`", ErrorInitSql)
 		}
 
 		err = container.RegisterSimpleModule(
@@ -176,7 +177,7 @@ func Init(
 	if enabled, ok := modules["supabase"]; ok && enabled {
 		port, err := strconv.Atoi(os.Getenv("SUPABASE_PORT"))
 		if err != nil {
-			container.Terminate("Can't register module `supabase`", ErrorRegisterSql)
+			container.Terminate("Can't register module `supabase`", ErrorInitSql)
 		}
 
 		supabase, err := db.NewPgPoolModule(
@@ -187,8 +188,8 @@ func Init(
 			os.Getenv("SUPABASE_DATABASE"),
 		)
 		if err != nil {
-			container.Terminate(fmt.Sprintf("Can't register module `supabase`: %v", err),
-				ErrorRegisterSql)
+			container.Terminate(fmt.Sprintf("Can't init module `supabase`: %v", err),
+				ErrorInitSql)
 		}
 
 		err = container.RegisterSimpleModule(
@@ -208,7 +209,7 @@ func Init(
 	if enabled, ok := modules["yugabyte"]; ok && enabled {
 		port, err := strconv.Atoi(os.Getenv("YUGABYTE_PORT"))
 		if err != nil {
-			container.Terminate("Can't register module `yugabyte`", ErrorRegisterSql)
+			container.Terminate("Can't init module `yugabyte`", ErrorInitSql)
 		}
 
 		yugabyte, err := db.NewPgModuleWithSsl(
@@ -219,8 +220,8 @@ func Init(
 			os.Getenv("YUGABYTE_DATABASE"),
 		)
 		if err != nil {
-			container.Terminate(fmt.Sprintf("Can't register module `yugabyte`: %v", err),
-				ErrorRegisterSql)
+			container.Terminate(fmt.Sprintf("Can't init module `yugabyte`: %v", err),
+				ErrorInitSql)
 		}
 
 		err = container.RegisterSimpleModule(
@@ -284,7 +285,7 @@ func Init(
 	if enabled, ok := modules["mysql"]; ok && enabled {
 		port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 		if err != nil {
-			container.Terminate("Can't register module `mysql`", ErrorRegisterSql)
+			container.Terminate("Can't init module `mysql`", ErrorInitSql)
 		}
 
 		mysql, err := db.NewMysqlModule(
@@ -343,6 +344,15 @@ func Init(
 		log.Print("Load module `mariadb` successfully")
 	}
 
-	if enabled, ok := modules["crawl"]; ok && enabled {
+	if enabled, ok := modules["spawn"]; ok && enabled {
+		err := container.RegisterSimpleModule(
+			spawn.NewSpawnModule(
+				os.Getenv("SPAWN_DATABASE"),
+				os.Getenv("SPAWN_ROOT_PATH"),
+			),
+		)
+		if err != nil {
+			container.Terminate(fmt.Sprintf("new spawn fail: %v", err), ErrorInitSpawn)
+		}
 	}
 }

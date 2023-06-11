@@ -9,8 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
+	"sync"
+	"sync/atomic"
+	"syscall"
 	"time"
 
+	"github.com/hung0913208/go-algorithm/lib/algorithm/heap"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -50,6 +55,13 @@ type RpcModule interface {
 	PairWith(module string) error
 }
 
+type CronModule interface {
+	Module
+
+	GetCron() map[string]int
+	GetJob(name string) (func(cancelChan chan bool, wg *sync.WaitGroup), error)
+}
+
 type wrapImpl struct {
 	name   string
 	module Module
@@ -58,9 +70,20 @@ type wrapImpl struct {
 }
 
 type containerImpl struct {
-	mapping map[string]wrapImpl
-	modules []Module
-	tracer  trace.Tracer
+	mapping  map[string]wrapImpl
+	modules  []Module
+	tracer   trace.Tracer
+	jobHeap  heap.Heap
+	timer    int64
+	sigChan  chan os.Signal
+	stopChan chan bool
+	doneChan chan bool
+}
+
+type jobImpl struct {
+	timer    int
+	handler  func(cancelChan chan bool, wg *sync.WaitGroup)
+	interval int
 }
 
 type responseImpl struct {
@@ -76,16 +99,70 @@ func Init(tracer trace.Tracer) error {
 		return errors.New("Only call init container one time at the begining")
 	}
 
+	sigChan := make(chan os.Signal, 1)
+	stopChan := make(chan bool, 1)
+	doneChan := make(chan bool, 1)
+	signal.Notify(sigChan, syscall.SIGALRM)
+
+	go func() {
+		wg := &sync.WaitGroup{}
+		cancelChan := make(chan bool)
+
+		for {
+			select {
+			case <-sigChan:
+				var job *jobImpl
+
+				alarm(1)
+
+				if obj, err := iContainerManager.jobHeap.Get(); err == nil {
+					timer := atomic.AddInt64(&iContainerManager.timer, 1)
+
+					if obj.(jobImpl).timer == int(timer) {
+						job = obj.(*jobImpl)
+						iContainerManager.jobHeap.Pop()
+						iContainerManager.jobHeap.Push(&jobImpl{
+							timer:    job.timer + job.interval,
+							handler:  job.handler,
+							interval: job.interval,
+						})
+					}
+				}
+
+				if job != nil {
+					wg.Add(1)
+					job.handler(cancelChan, wg)
+				}
+
+			case <-stopChan:
+				cancelChan <- true
+				wg.Wait()
+				doneChan <- true
+			}
+		}
+	}()
+
+	alarm(1)
+
 	iContainerManager = &containerImpl{
 		mapping: make(map[string]wrapImpl),
 		modules: make([]Module, 0),
 		tracer:  tracer,
+		jobHeap: heap.NewHeapWithComparator(func(l, r interface{}) int {
+			return l.(jobImpl).timer - r.(jobImpl).timer
+		}),
+		sigChan:  sigChan,
+		stopChan: stopChan,
+		doneChan: doneChan,
 	}
 	return nil
 }
 
-func RegisterSimpleModule(name string, module Module,
-	timeout int) error {
+func RegisterSimpleModule(
+	name string,
+	module Module,
+	timeout int,
+) error {
 	if iContainerManager == nil {
 		if err := Init(nil); err != nil {
 			return err
@@ -114,12 +191,49 @@ func RegisterSimpleModule(name string, module Module,
 	return nil
 }
 
-func RegisterRpcModule(name string, module Module,
-	timeout int) error {
+func RegisterRpcModule(
+	name string,
+	module Module,
+	timeout int,
+) error {
+	err := RegisterSimpleModule(name, module, timeout)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RegisterCronModule(
+	name string,
+	module Module,
+	timeout int,
+) error {
+	err := RegisterSimpleModule(name, module, timeout)
+	if err != nil {
+		return err
+	}
+
+	for name, interval := range module.(CronModule).GetCron() {
+		handler, err := module.(CronModule).GetJob(name)
+		if err != nil {
+			return err
+		}
+
+		if handler != nil {
+			iContainerManager.jobHeap.Push(&jobImpl{
+				timer:    interval,
+				handler:  handler,
+				interval: interval,
+			})
+		}
+	}
 	return nil
 }
 
 func Terminate(msg string, exitCode int) {
+	fmt.Printf("Exit(%d) with error %s", exitCode, msg)
+
 	if iContainerManager != nil {
 		for _, wrap := range iContainerManager.mapping {
 			if !wrap.status {
@@ -137,8 +251,6 @@ func Terminate(msg string, exitCode int) {
 	if exitCode != 0 {
 		panic(fmt.Sprintf("Exit(%d) with error %s", exitCode, msg))
 	}
-
-	os.Exit(exitCode)
 }
 
 func Pick(name string) (Module, error) {
