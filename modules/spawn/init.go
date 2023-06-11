@@ -8,10 +8,10 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/container"
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/db"
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/telegram"
-	"github.com/hung0913208/telegram-bot-for-kubernetes/modules/toolbox"
+	"github.com/hung0913208/go-algorithm/lib/container"
+	"github.com/hung0913208/go-algorithm/lib/db"
+	"github.com/hung0913208/go-algorithm/lib/telegram"
+	"github.com/hung0913208/go-algorithm/modules/toolbox"
 )
 
 func (self *spawnImpl) Init(timeout time.Duration) error {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/container"
+	"github.com/hung0913208/go-algorithm/lib/container"
 )
 
 type errorImpl struct {
