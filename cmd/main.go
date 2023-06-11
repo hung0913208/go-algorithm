@@ -7,9 +7,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/container"
-	"github.com/hung0913208/telegram-bot-for-kubernetes/lib/utils"
-	"github.com/hung0913208/telegram-bot-for-kubernetes/modules"
+	"github.com/hung0913208/go-algorithm/lib/container"
+	"github.com/hung0913208/go-algorithm/lib/utils"
+	"github.com/hung0913208/go-algorithm/modules"
 )
 
 func main() {
