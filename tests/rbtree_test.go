@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hung0913208/go-rbtreerithm/lib/rbtreerithm/rbtree"
+	"github.com/hung0913208/go-algorithm/lib/algorithm/rbtree"
 )
 
 func TestInsertRbTree(t *testing.T) {
