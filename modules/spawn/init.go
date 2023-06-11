@@ -1,6 +1,10 @@
 package spawn
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -25,19 +29,20 @@ func (self *spawnImpl) Init(timeout time.Duration) error {
 		return err
 	}
 
-	err = self.initSpawnTargets(dbConn, timeout)
+	err = self.initSpawnTargets(dbConn)
 	if err != nil {
 		return err
 	}
 
 	self.broker = telegram.NewTelegram(os.Getenv("TELEGRAM_TOKEN"))
+	self.timeout = timeout
 	return nil
 }
 
 func (self *spawnImpl) Deinit() error {
 	for _, cmd := range self.processes {
 		go func(cmd *exec.Cmd) {
-			time.Sleep(60 * time.Second)
+			time.Sleep(self.timeout * time.Millisecond)
 			cmd.Process.Signal(os.Kill)
 		}(cmd)
 
@@ -48,7 +53,7 @@ func (self *spawnImpl) Deinit() error {
 	return nil
 }
 
-func (self *spawnImpl) initSpawnTargets() error {
+func (self *spawnImpl) initSpawnTargets(dbConn *gorm.DB) error {
 	var setting toolbox.SettingModel
 	var targets []Target
 
@@ -68,21 +73,19 @@ func (self *spawnImpl) initSpawnTargets() error {
 			continue
 		}
 
-		command := make([]string, 0)
-
 		for _, binary := range target.Binaries {
-			path, err := downloadBinary(binary.Path)
+			path, err := self.downloadBinary(binary.Path)
 			if err != nil {
 				return err
 			}
 
-			err = os.Chmod(path, int(binary.Chmod))
+			err = os.Chmod(path, os.FileMode(binary.Chmod))
 			if err != nil {
 				return err
 			}
 
 			if binary.Chmod == Executable && target.Command.File == binary.Path {
-				proc := exec.Command(path, tagret.Command.Args...)
+				proc := exec.Command(path, target.Command.Args...)
 
 				self.processes[target.Name] = proc
 				self.wg.Add(1)

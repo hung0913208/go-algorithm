@@ -2,22 +2,22 @@ package spawn
 
 import (
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"sync"
 	"time"
 
 	"github.com/hung0913208/go-algorithm/lib/container"
+	"github.com/hung0913208/go-algorithm/lib/logs"
 	"github.com/hung0913208/go-algorithm/lib/telegram"
 )
 
-type ChmodType int
+type Chmod int
 
 const (
-	Readonly   ChmodType = 0644
-	ReadWrite  ChmodType = 0755
-	Executable ChmodType = 0777
+	Readonly   Chmod = 0644
+	ReadWrite  Chmod = 0755
+	Executable Chmod = 0777
 )
 
 type Spawn interface {
@@ -31,7 +31,7 @@ type Command struct {
 
 type Binary struct {
 	Path  string `json:"path"`
-	Chmod int    `json:"chmod"`
+	Chmod Chmod  `json:"chmod"`
 }
 
 type Target struct {
@@ -43,6 +43,8 @@ type Target struct {
 type spawnImpl struct {
 	wg        sync.WaitGroup
 	root      string
+	dbConfig  string
+	logger    logs.Logger
 	broker    telegram.Telegram
 	writer    http.ResponseWriter
 	reader    *http.Request
@@ -58,9 +60,11 @@ func NewSpawnModule(dbConfig, root string) Spawn {
 	}
 
 	return &spawnImpl{
-		broker: broker,
-		root:   root,
-	}, nil
+		broker:   broker,
+		root:     root,
+		logger:   logs.NewLoggerWithStacktrace(),
+		dbConfig: dbConfig,
+	}
 }
 
 func (self *spawnImpl) GetTimeout() time.Duration {

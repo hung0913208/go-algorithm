@@ -6,30 +6,21 @@
 
 GO := $(shell which go || echo "/opt/homebrew/bin/go")
 
-all: build test
+all: build
 
 init:
 	@-$(GO) mod tidy
 
-crawl: init
-	@-$(GO) build -o crawl ./cmd/crawl/main.go
+main: init
+	@-$(GO) build -o main ./cmd/main.go
 
-build: crawl
+build: main
 
 test: init
 	@-$(GO) test -v  -bench=. -benchmem ./tests/...
 
 clean:
-	@-rm -fr ./agent
-
-install: agent
-	@-mkdir -p /usr/local/bin
-	@-mv ./agent /usr/local/bin/agent
-	@-cp ./cmd/agent/agent.service /lib/systemd/system/agent.service
-	@-chmod 755 /lib/systemd/system/agent.service
-	@-systemctl daemon-reload
-	@-systemctl enable agent
-	@-systemctl start agent
+	@-rm -fr ./main
 
 uninstall: clean
-	@-rm -fr /usr/local/bin/agent
+	@-rm -fr /usr/local/bin/main
