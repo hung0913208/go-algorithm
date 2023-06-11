@@ -3,6 +3,7 @@ package kv
 import (
 	"context"
 	"errors"
+	"os"
 	"time"
 
 	mdb "github.com/memcachier/mc/v3"
@@ -39,11 +40,10 @@ func NewRedis(url string) (KV, error) {
 	}
 
 	rdbConn := rdb.NewClient(opt)
-	if err := rdbOtel.InstrumentTracing(rdbConn); err != nil {
-		return nil, err
-	}
-	if err := rdbOtel.InstrumentMetrics(rdbConn); err != nil {
-		return nil, err
+	if len(os.Getenv("UPTRACE_DSN")) > 0 {
+		if err := rdbOtel.InstrumentTracing(rdbConn); err != nil {
+			return nil, err
+		}
 	}
 
 	return &kvImpl{

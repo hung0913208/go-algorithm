@@ -174,8 +174,10 @@ func NewMysql(
 		return nil, err
 	}
 
-	if err := dbConn.Use(otel.NewPlugin()); err != nil {
-		return nil, err
+	if len(os.Getenv("UPTRACE_DSN")) > 0 {
+		if err := dbConn.Use(otel.NewPlugin()); err != nil {
+			return nil, err
+		}
 	}
 
 	ret := &dbImpl{
