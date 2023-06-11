@@ -55,7 +55,7 @@ func NewMysqlModule(
 ) (container.Module, error) {
 	return &dbModuleImpl{
 		initCallback: func(module *dbModuleImpl, timeout time.Duration) error {
-			dbObj, err := NewMysql(host, port, username, password, database,
+			dbObj, err := NewMysqlV1(host, port, username, password, database,
 				timeout, true)
 			if err != nil {
 				return err
@@ -74,7 +74,7 @@ func NewPgModule(
 ) (container.Module, error) {
 	return &dbModuleImpl{
 		initCallback: func(module *dbModuleImpl, timeout time.Duration) error {
-			dbObj, err := NewPg(host, port, username, password, database,
+			dbObj, err := NewPgV1(host, port, username, password, database,
 				timeout, "disable",
 				true)
 			if err != nil {
@@ -94,7 +94,7 @@ func NewPgPoolModule(
 ) (container.Module, error) {
 	return &dbModuleImpl{
 		initCallback: func(module *dbModuleImpl, timeout time.Duration) error {
-			dbObj, err := NewPg(
+			dbObj, err := NewPgV1(
 				host, port, username, password, database,
 				timeout, "disable",
 				false)
@@ -115,7 +115,7 @@ func NewPgModuleWithSsl(
 ) (container.Module, error) {
 	return &dbModuleImpl{
 		initCallback: func(module *dbModuleImpl, timeout time.Duration) error {
-			dbObj, err := NewPg(host, port, username, password, database,
+			dbObj, err := NewPgV1(host, port, username, password, database,
 				timeout, "require",
 				true)
 			if err != nil {
@@ -131,7 +131,7 @@ func NewPgModuleWithSsl(
 func Establish(module container.Module) (*gorm.DB, error) {
 	if wrapper, ok := module.(*dbModuleImpl); ok {
 		if wrapper.dbObj != nil {
-			return wrapper.dbObj.Establish(), nil
+			return wrapper.dbObj.EstablishV1(), nil
 		} else {
 			return nil, errors.New("can't establish database connection")
 		}

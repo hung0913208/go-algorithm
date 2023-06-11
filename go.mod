@@ -9,6 +9,7 @@ require (
 	github.com/memcachier/mc/v3 v3.0.3
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
 	github.com/redis/go-redis/v9 v9.0.5
+	github.com/uptrace/bun v1.1.14
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.1
 	github.com/uptrace/uptrace-go v1.16.0
 	go.opentelemetry.io/otel v1.16.0
@@ -60,7 +61,10 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.0.5 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.2.1 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.42.0 // indirect

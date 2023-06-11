@@ -7,6 +7,8 @@ import (
 
 	otel "github.com/uptrace/opentelemetry-go-extra/otelgorm"
 
+	"github.com/uptrace/bun"
+
 	"gorm.io/driver/bigquery"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -19,7 +21,8 @@ import (
 )
 
 type Db interface {
-	Establish() *gorm.DB
+	EstablishV1() *gorm.DB
+	EstablishV2() *bun.DB
 }
 
 type dbImpl struct {
@@ -111,7 +114,7 @@ func NewBigQuery(
 	}
 }
 
-func NewMysql(
+func NewMysqlV1(
 	host string,
 	port int,
 	username, password, database string,
@@ -187,7 +190,7 @@ func NewMysql(
 	return ret, ret.setupConnectionPool(5, 5, time.Duration(60)*time.Second)
 }
 
-func NewPg(
+func NewPgV1(
 	host string,
 	port int,
 	username, password, database string,
@@ -282,7 +285,7 @@ func (self *dbImpl) setupConnectionPool(
 	return nil
 }
 
-func (self *dbImpl) Establish() *gorm.DB {
+func (self *dbImpl) EstablishV1() *gorm.DB {
 	if os.Getenv("DEBUG") == "true" {
 		return self.dbConn.
 			Debug().
@@ -290,6 +293,10 @@ func (self *dbImpl) Establish() *gorm.DB {
 	} else {
 		return self.dbConn.WithContext(container.GetContext())
 	}
+}
+
+func (self *dbImpl) EstablishV2() *bun.DB {
+	return nil
 }
 
 func (self *dialectorProxyImpl) Name() string {

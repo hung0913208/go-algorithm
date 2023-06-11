@@ -101,6 +101,7 @@ func Init(
 			ErrorInitContainer,
 		)
 	}
+	return
 
 	if len(os.Getenv("SENTRY_DSN")) > 0 {
 		// @NOTE: configure sentry
