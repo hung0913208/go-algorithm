@@ -37,8 +37,6 @@ const (
 var (
 	input   string
 	outputs []string
-
-	tracer = ot.Tracer("monitor")
 )
 
 func RegisterWithRetry(
@@ -92,8 +90,12 @@ func Init(
 
 	outputs = make([]string, 0)
 
-	// @NOTE: configure opentelemetry
-	err = container.Init(tracer)
+	if len(os.Getenv("UPTRACE_DSN")) > 0 {
+		err = container.Init(ot.Tracer("monitor"))
+	} else {
+		err = container.Init(nil)
+	}
+
 	if err != nil {
 		container.Terminate(
 			"Can't setup container to store modules",

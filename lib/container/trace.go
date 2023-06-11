@@ -199,7 +199,7 @@ func GetContext() context.Context {
 }
 
 func (self *traceImpl) Enter(function string) (trace.Span, context.Context) {
-	if !self.enabled || len(os.Getenv("UPTRACE_DSN")) == 0 {
+	if !self.enabled || len(os.Getenv("UPTRACE_DSN")) == 0 || self.tracer == nil {
 		return &spanImpl{}, nil
 	}
 
@@ -217,7 +217,7 @@ func (self *traceImpl) Enter(function string) (trace.Span, context.Context) {
 }
 
 func (self *traceImpl) Exit() {
-	if !self.enabled || len(os.Getenv("UPTRACE_DSN")) == 0 {
+	if !self.enabled || len(os.Getenv("UPTRACE_DSN")) == 0 || self.tracer == nil {
 		return
 	}
 
