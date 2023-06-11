@@ -1,6 +1,6 @@
 module github.com/hung0913208/go-algorithm
 
-go 1.19
+go 1.20
 
 require (
 	github.com/getsentry/sentry-go v0.20.0
