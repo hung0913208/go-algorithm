@@ -346,13 +346,15 @@ func Init(
 
 	if enabled, ok := modules["spawn"]; ok && enabled {
 		err := container.RegisterSimpleModule(
+			"spawn",
 			spawn.NewSpawnModule(
 				os.Getenv("SPAWN_DATABASE"),
 				os.Getenv("SPAWN_ROOT_PATH"),
 			),
+			timeoutModule,
 		)
 		if err != nil {
-			container.Terminate(fmt.Sprintf("new spawn fail: %v", err), ErrorInitSpawn)
+			container.Terminate(fmt.Sprintf("new spawn fail: %v", err), ErrorRegisterSpawn)
 		}
 	}
 }
